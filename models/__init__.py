@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 
 if os.environ.get('HBNB_TYPE_STORAGE') == 'db':
