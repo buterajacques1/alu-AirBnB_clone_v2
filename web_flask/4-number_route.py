@@ -3,8 +3,11 @@
 Starts a Flask web application with the following routes:
 - /: display "Hello HBNB!"
 - /hbnb: display "HBNB"
-- /c/<text>: display "C " followed by the value of the text variable (replace underscore _ symbols with a space)
-- /python/(<text>): display "Python " followed by the value of the text variable (replace underscore _ symbols with a space). The default value of text is "is cool"
+- /c/<text>: display "C " followed by the value of the text variable (replace
+underscore _ symbols with a space)
+- /python/(<text>): display "Python " followed by the value of the text variable
+(replace underscore _ symbols with a space). The default value of text is "is
+cool"
 - /number/<n>: display "<n> is a number" only if n is an integer
 """
 
@@ -34,7 +37,8 @@ def c(text):
 @app.route('/python/', defaults={'text': 'is cool'}, strict_slashes=False)
 @app.route('/python/<text>', strict_slashes=False)
 def python(text):
-    """Displays 'Python ' followed by the value of the text variable. The default value of text is 'is cool'"""
+    """Displays 'Python ' followed by the value of the text variable. The default
+    value of text is 'is cool'"""
     return 'Python {}'.format(text.replace('_', ' '))
 
 
