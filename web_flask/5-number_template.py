@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-""" Module to start a web applicaction and
+""" Module to start a web application and
     display binded messages
 """
 
-
 from flask import Flask, render_template
+
 app = Flask(__name__)
 
 
