@@ -1,55 +1,80 @@
 #!/usr/bin/python3
+""" Storage class for DB for AirBnB Clone_V2 """
 from os import getenv
+from models.base_model import BaseModel, Base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from models.base_model import Base
 
 
-class DBStorage:
+class DBStorage():
+    """ Class to connect MySQL """
     __engine = None
     __session = None
 
     def __init__(self):
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
-                                       .format(getenv('HBNB_MYSQL_USER'),
-                                               getenv('HBNB_MYSQL_PWD'),
-                                               getenv('HBNB_MYSQL_HOST', 'localhost'),
-                                               getenv('HBNB_MYSQL_DB')),
-                                       pool_pre_ping=True)
+        """ Constructor """
+        user = getenv("HBNB_MYSQL_USER")
+        pwd = getenv("HBNB_MYSQL_PWD")
+        host = getenv("HBNB_MYSQL_HOST")
+        dataBase = getenv("HBNB_MYSQL_DB")
+        HBNB_ENV = getenv("HBNB_ENV")
 
-        if getenv('HBNB_ENV') == 'test':
+        dbConnector = 'mysql+mysqldb://{}:{}@{}/{}'
+        self.__engine = create_engine(dbConnector.format(
+            user, pwd, host, dataBase), pool_pre_ping=True)
+
+        if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        from models import classes
-        result = {}
+        """ query all objects depending of the class name """
+        classes = ['State', 'City', 'User', 'Place', 'Review', 'Amenity']
+        class_dict = {}
+        # print("All DbStorage")
         if cls is None:
-            for cls in classes:
-                for obj in self.__session.query(cls):
-                    key = '{}.{}'.format(type(obj).__name__, obj.id)
-                    result[key] = obj
+            for _class in classes:
+                _object = self.__session.query(eval(_class))
+                for _obj in _object:
+                    key = type(_obj).__name__ + '.' + _obj.id
+                    class_dict[key] = _obj
         else:
-            for obj in self.__session.query(cls):
-                key = '{}.{}'.format(type(obj).__name__, obj.id)
-                result[key] = obj
-        return result
+            # busca por el tipo de objeto
+            _object = self.__session.query(cls).all()
+            for _obj in _object:
+                key = type(_obj).__name__ + '.' + _obj.id
+                class_dict[key] = _obj
+        return class_dict
 
     def new(self, obj):
+        """ add the object to the current database session """
         self.__session.add(obj)
 
     def save(self):
+        """ commit all changes of the current database session """
         self.__session.commit()
 
     def delete(self, obj=None):
+        """ delete from the current database session obj if not None """
         if obj is not None:
             self.__session.delete(obj)
 
     def reload(self):
+        """Reload objects """
         Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(session_factory)
+        # sess_factory=sessionmaker(bind=self.__engine,expire_on_commit=False)
+        Session = scoped_session(sessionmaker(
+            bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
 
+    # added for AirBnB clone - Web framework
+    # task 7
     def close(self):
-        """Close active session"""
+        ''' close session'''
         self.__session.close()
